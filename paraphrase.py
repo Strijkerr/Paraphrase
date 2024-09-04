@@ -46,12 +46,6 @@ def parse_arguments():
         help="Top_p value default 1.0.",
     )
     parser.add_argument("--seed", type=int, default=None, help="Random seed.")
-    parser.add_argument(
-        "--out",
-        type=argparse.FileType("w"),
-        default="output.txt",
-        help="Output file for .jsonl; otherwise outputs.",
-    )
     args = parser.parse_args()
     return args
 
@@ -65,7 +59,6 @@ def paraphrase_cli():
         f"Using hyperparameters - Temp: {args.temp}, Top_k: {args.top_k}, Top_p: {args.top_p}"
     )
     logging.info(f"Input file: {args.file}")
-    logging.info(f"Output file: {args.out}")
     if args.seed is None:
         logging.info("Seed not implemented yet.")
 
