@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 dependencies = ["transformers", "torch", "torchaudio", "torchvision", "accelerate", "bitsandbytes", "sentencepiece", "protobuf"]
 
 [project.scripts]
-paraphrase = "LLM_rephrasing:paraphrase_cli"
+paraphrase = "paraphrase:paraphrase_cli"
 
 [project.urls]
 "Homepage" = "https://github.com/Strijkerr/Paraphrase"
