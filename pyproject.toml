@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Paraphraser"
+version = "0.1"
+description = "Rephraser using Huggingface LLM."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["transformers", "torch", "torchaudio", "torchvision", "accelerate", "bitsandbytes", "sentencepiece", "protobuf"]
+
+[project.scripts]
+paraphrase = "LLM_rephrasing:paraphrase_cli"
+
+[project.urls]
+"Homepage" = "https://github.com/Strijkerr/Paraphrase"
+"Bug Tracker" = "https://github.com/Strijkerr/Paraphrase/issues"
