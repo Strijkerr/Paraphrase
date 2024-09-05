@@ -1,2 +1,5 @@
 input.txt
 .venv
+.streamlit
+streamlit.py
+*.slurm
