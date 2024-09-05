@@ -75,19 +75,23 @@ def paraphrase_cli():
         top_k=args.top_k,
         top_p=args.top_p,
     )
-
-    input_reader = preprocess_inputs(args.file)  # generator of messages_lists
+    input_reader = prompt_formatting(args.file)  # generator of messages_lists
     for input in input_reader:
+        raw_input = input[1]['content'].split("'")[1].strip()
         response = pipe(input)
         list_of_responses = [
             text["generated_text"][2]["content"].strip() for text in response
         ]
         for res in list_of_responses:
+            intersection = set(res.split(' ')) & set(raw_input.split(' '))
+            union = set(res.split(' ')) | set(raw_input.split(' '))
+            iou = round(len(intersection) / len(union), 2)
+            logging.info(f"Intersection over Union between original and generated text: {iou}")
             print(res.replace("\n", ""))
         print()
 
 
-def preprocess_inputs(texts):
+def prompt_formatting(texts):
     for text in texts:
         prompt = [
             {
