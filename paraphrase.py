@@ -13,7 +13,7 @@ def parse_arguments():
         nargs="?",
         type=argparse.FileType("r"),
         default=sys.stdin,
-        help="Input .csv or jsonl file or stdin",
+        help="One line per text to-be-paraphrased.",
     )
     parser.add_argument(
         "--model",
@@ -59,8 +59,8 @@ def paraphrase_cli():
         f"Using hyperparameters - Temp: {args.temp}, Top_k: {args.top_k}, Top_p: {args.top_p}"
     )
     logging.info(f"Input file: {args.file}")
-    if args.seed is None:
-        logging.info("Seed not implemented yet.")
+    if args.seed:
+        logging.warning("Seed not implemented yet.")
 
     # See https://huggingface.co/docs/transformers/main_classes/text_generation for all hyperparameters
     pipe = pipeline(
@@ -75,32 +75,35 @@ def paraphrase_cli():
         top_k=args.top_k,
         top_p=args.top_p,
     )
-    input_reader = prompt_formatting(args.file)  # generator of messages_lists
-    for input in input_reader:
-        raw_input = input[1]['content'].split("'")[1].strip()
-        response = pipe(input)
-        list_of_responses = [
-            text["generated_text"][2]["content"].strip() for text in response
-        ]
-        for res in list_of_responses:
-            intersection = set(res.split(' ')) & set(raw_input.split(' '))
-            union = set(res.split(' ')) | set(raw_input.split(' '))
-            iou = round(len(intersection) / len(union), 2)
-            logging.info(f"Intersection over Union between original and generated text: {iou}")
-            print(res.replace("\n", ""))
+    
+    for response in pipe(iter_prompts(args.file)):
+        # each 'response' is a chain of messages (inc. the system message and prompt)
+        for message in response:
+
+            input_text = message["generated_text"][1]['content'].split("\n", maxsplit=1)[-1]
+            response_text = message["generated_text"][2]["content"]
+            
+            logging.info(f"Similarity of paraphrase to original (IOU): {round(iou(input_text, response_text), 2)}")
+            
+            print(response.replace("\n", "\\n"))
         print()
 
 
-def prompt_formatting(texts):
+def iou(text1, text2):
+    set1 = set(text1.strip().lower().split())
+    set2 = set(text2.strip().lower().split())
+    return len(set1 & set2) / len(set1 | set2)
+
+def iter_prompts(texts):
     for text in texts:
         prompt = [
             {
                 "role": "system",
-                "content": "Je bent een schrijver die zinnen op andere manieren kan formuleren.",
+                "content": "Je bent een behulpzame assistent.",
             },
             {
                 "role": "user",
-                "content": f"Kan je de volgende zin anders schrijven: '{text}'",
+                "content": f"Formuleer de onderstaande zin lichtjes, met behoud van betekenis (en verander niet te veel!): \n{text}",
             },
         ]
         yield prompt
